@@ -72,7 +72,7 @@ add_executable(tutorial02_red_triangle
 	tutorial02_red_triangle/tutorial02.cpp
 	common/shader.cpp
 	common/shader.hpp
-	
+	common/
 	tutorial02_red_triangle/SimpleFragmentShader.fragmentshader
 	tutorial02_red_triangle/SimpleVertexShader.vertexshader
 )

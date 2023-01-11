@@ -93,4 +93,7 @@ dependencies: \
   /Users/hyunahome/Desktop/OpenGL_Tutorial/ogl-master/external/glm-0.9.7.1/glm/integer.hpp \
   /Users/hyunahome/Desktop/OpenGL_Tutorial/ogl-master/external/glm-0.9.7.1/glm/detail/func_integer.hpp \
   /Users/hyunahome/Desktop/OpenGL_Tutorial/ogl-master/external/glm-0.9.7.1/glm/detail/func_integer.inl \
-  /Users/hyunahome/Desktop/OpenGL_Tutorial/ogl-master/common/shader.hpp
+  /Users/hyunahome/Desktop/OpenGL_Tutorial/ogl-master/common/shader.hpp \
+  /Users/hyunahome/Desktop/OpenGL_Tutorial/ogl-master/tutorial02_red_triangle/VBO.hpp \
+  /Users/hyunahome/Desktop/OpenGL_Tutorial/ogl-master/tutorial02_red_triangle/EBO.hpp \
+  /Users/hyunahome/Desktop/OpenGL_Tutorial/ogl-master/tutorial02_red_triangle/VAO.hpp
