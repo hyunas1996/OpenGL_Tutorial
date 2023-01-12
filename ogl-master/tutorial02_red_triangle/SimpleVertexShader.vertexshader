@@ -2,11 +2,23 @@
 
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec3 vertexPosition_modelspace;
+layout(location = 1) in vec3 vertexColor_modelspace; // Shader tutorial - color 추가
+
+// color 담당은 fragment shader니까, color 정보를 fragment shader에게 넘겨주자
+out vec3 vertexColor;
+
+// uniform scaling 변수인듯
+uniform float scale;
 
 void main(){
 
-    gl_Position.xyz = vertexPosition_modelspace;
-    gl_Position.w = 1.0;
-
+    // gl_Position.xyz = vertexPosition_modelspace;
+    // gl_Position.w = 1.0;
+    gl_Position = vec4(vertexPosition_modelspace.x + vertexPosition_modelspace.x * scale,
+    vertexPosition_modelspace.y + vertexPosition_modelspace.y * scale,
+    vertexPosition_modelspace.z + vertexPosition_modelspace.z * scale,
+    1.0);
+    
+    vertexColor = vertexColor_modelspace; // output에 위에서 받아온 vertex color 전달
 }
 

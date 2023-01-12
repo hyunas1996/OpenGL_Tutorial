@@ -34,24 +34,30 @@ const char* fragmentShaderSource = "#version 330 core\n"
 "   FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0f);\n"
 "}\n\0";
 
-
-int main(void){ // organized!
+int main(void){ // shader
     
+    // Initialize GLFW
     glfwInit();
-    glfwWindowHint(GLFW_SAMPLES, 4);
+
+    // Tell GLFW what version of OpenGL we are using
+    // In this case we are using OpenGL 3.3
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    // Tell GLFW we are using the CORE profile
+    // So that means we only have the modern functions
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow( 1024, 768, "Tutorial 02", NULL, NULL);
-
-    if (window == NULL){
+    // Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
+    GLFWwindow* window = glfwCreateWindow(800, 800, "YoutubeOpenGL", NULL, NULL);
+    // Error check if the window fails to create
+    if (window == NULL)
+    {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
-
+    // Introduce the window into the current context
     glfwMakeContextCurrent(window);
     
     glewExperimental = true;
@@ -62,492 +68,74 @@ int main(void){ // organized!
         return -1;
     }
     
-//    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-//    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-//    glCompileShader(vertexShader); // 이제 vertext shader 완성
-//
-//    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-//    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-//    glCompileShader(fragmentShader);
-//
-//    GLuint shaderProgram = glCreateProgram();
-//    glAttachShader(shaderProgram, vertexShader);
-//    glAttachShader(shaderProgram, fragmentShader);
-//    glLinkProgram(shaderProgram);
-//
-//    glDeleteShader(vertexShader);
-//    glDeleteShader(fragmentShader);
-    
-        GLuint shaderProgram = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
+//    GLuint shaderProgram = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
+    Shader shaderProgram("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
 
-    // ************ TUTORIAL 03 INDEX BUFFER ************ //
-    GLfloat vertices[] =  // float을 써도 되긴 하지만, GLfloat을 사용하는 것이 openGL 내부 연산에서 좀 더 안전
+    
+    GLfloat vertices[] =  // add colors
     {
-        -0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,    // Lower left corner
-        0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,     // Lower right corner
-        0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f,  // Upper corner
-        -0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner left
-        0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f,  // Inner right
-        0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f      // Inner down
+        //              COORNIATES                  /       COLORS
+        -0.5f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f,     0.8f, 0.3f,  0.02f, // Lower left corner
+         0.5f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f,     0.8f, 0.3f,  0.02f, // Lower right corner
+         0.0f,  0.5f * float(sqrt(3)) * 2 / 3, 0.0f,     1.0f, 0.6f,  0.32f, // Upper corner
+        -0.25f, 0.5f * float(sqrt(3)) * 1 / 6, 0.0f,     0.9f, 0.45f, 0.17f, // Inner left
+         0.25f, 0.5f * float(sqrt(3)) * 1 / 6, 0.0f,     0.9f, 0.45f, 0.17f, // Inner right
+         0.0f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f,     0.8f, 0.3f,  0.02f  // Inner down
     };
     
     
-    // draw 순서를 명시해 주는 배열 -> 이게 index buffer로 넘어갈 예정
     GLuint indices[] =
     {
         0, 3, 5,    // lower left
         3, 2, 4,    // lower right
         5, 4, 1     // upper
     };
-    
-//    GLuint VAO;
-//    GLuint VBO;
-//    GLuint EBO; // EBO라는 index buffer를 선언하다
-//
-//    glGenVertexArrays(1, &VAO);
-//    glGenBuffers(1, &VBO);
-//    glGenBuffers(1, &EBO); // EBO에 대한 buffer 생성
-//
-//    glBindVertexArray(VAO);
-//    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // EBO에 대한 binding;
-//
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-//
-//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-//    glEnableVertexAttribArray(0);
-//
-//    glBindBuffer(GL_ARRAY_BUFFER, 0);
-//    glBindVertexArray(0);
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    
+        
+    // Generates Vertex Array Object and binds it
     VAO VAO1;
     VAO1.Bind();
-    
+
+    // Generates Vertex Buffer Object and links it to vertices
     VBO VBO1(vertices, sizeof(vertices));
+    // Generates Element Buffer Object and links it to indices
     EBO EBO1(indices, sizeof(indices));
-    
-    VAO1.LinkVBO(VBO1, 0);
+
+    // Links VBO attributes such as coordinates and colors to VAO
+    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
+    VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    // Unbind all to prevent accidentally modifying them
     VAO1.Unbind();
     VBO1.Unbind();
     EBO1.Unbind();
-   
+    
+    GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
+    
     while(!glfwWindowShouldClose(window)){
 
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
-        glUseProgram(shaderProgram);
+//        glUseProgram(shaderProgram);
+        shaderProgram.Activate();
         
-//        glBindVertexArray(VAO);
+        // scale 적용
+        glUniform1f(uniID, 0.5f);
+        
         VAO1.Bind();
-        
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
-        // draw 하는 함수도 변경 해 줘야함
         glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
-        
         
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
     
-    
-    // 더 이상 사용하지 않는 것들 삭제
-//    glDeleteVertexArrays(1, &VAO);
-//    glDeleteBuffers(1, &VBO);
-//    glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
+//    glDeleteProgram(shaderProgram);
+    shaderProgram.Delete();
     
     VAO1.Delete();
     VBO1.Delete();
     EBO1.Delete();
 
-    // window로 해야할 일이 다 끝나면, window를 종료시키기
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
 }
-
-
-int main_small_triangle(void){ // small triangle in the main one => Use Index Buffer
-    
-    glfwInit();
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    GLFWwindow* window = glfwCreateWindow( 1024, 768, "Tutorial 02", NULL, NULL);
-
-    if (window == NULL){
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-    
-    glewExperimental = true;
-    if (glewInit() != GLEW_OK) {
-        fprintf(stderr, "Failed to initialize GLEW\n");
-        getchar();
-        glfwTerminate();
-        return -1;
-    }
-    
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader); // 이제 vertext shader 완성
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    //    GLuint shaderProgram = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
-
-    // ************ TUTORIAL 03 INDEX BUFFER ************ //
-    GLfloat vertices[] =  // float을 써도 되긴 하지만, GLfloat을 사용하는 것이 openGL 내부 연산에서 좀 더 안전
-    {
-        -0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,    // Lower left corner
-        0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,     // Lower right corner
-        0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f,  // Upper corner
-        -0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner left
-        0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f,  // Inner right
-        0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f      // Inner down
-    };
-    
-    
-    // draw 순서를 명시해 주는 배열 -> 이게 index buffer로 넘어갈 예정
-    GLuint indices[] =
-    {
-        0, 3, 5,    // lower left
-        3, 2, 4,    // lower right
-        5, 4, 1     // upper
-    };
-    
-    GLuint VAO;
-    GLuint VBO;
-    GLuint EBO; // EBO라는 index buffer를 선언하다
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO); // EBO에 대한 buffer 생성
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // EBO에 대한 binding;
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-   
-    while(!glfwWindowShouldClose(window)){
-
-        glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        
-        glUseProgram(shaderProgram);
-        
-        glBindVertexArray(VAO);
-        
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
-        // draw 하는 함수도 변경 해 줘야함
-        glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
-        
-        
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-    
-    
-    // 더 이상 사용하지 않는 것들 삭제
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
-
-    // window로 해야할 일이 다 끝나면, window를 종료시키기
-    glfwDestroyWindow(window);
-    glfwTerminate();
-    return 0;
-}
-
-
-int main_singletriangle(void){
-
-    // GLFW 초기화
-    glfwInit();
-
-    // glfwWindowHint를 사용해서 GLFW를 설정
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);  // OpenGL 3.3 설정
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);  // OpenGL 3.3 설정
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Mac에서는 이것 추가해야함
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    // Window 선언
-    GLFWwindow* window = glfwCreateWindow( 1024, 768, "Tutorial 02", NULL, NULL);
-
-    if (window == NULL){
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window); // GLFW에게 window를 current context로 사용하고 싶다고 전달
-    
-    // Initialize GLEW
-    glewExperimental = true; // Needed for core profile
-    if (glewInit() != GLEW_OK) {
-        fprintf(stderr, "Failed to initialize GLEW\n");
-        getchar();
-        glfwTerminate();
-        return -1;
-    }
-    
-    // *************** TUTORIAL 02 ***************//
-
-    // *************** SHADER ***************//
-    // 이제 이 vertices를 graphics pipeline 내부로 넣어야함
-    // vertex shader, fragment shader는 우리가 references로만 접근이 가능함, 즉 value로 접근 가능
-
-    // glCreateShader(Shader 종류)를 활용해서 shader 생성
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER); // GLuint: OpenGL unsigned integer
-
-    // line 61에서 생성한 shader 변수에 shader source code를 적용
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-
-    // 근데 GPU는 이 source code를 바로 이해할 수 없기 때문에, machine code로 compile 해 줘야함
-    glCompileShader(vertexShader); // 이제 vertext shader 완성
-
-    // 동일 과정을 fragment shader에 대해서도 진행
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    // 이제 이 shader를 직접 사용하기 위해서는 shader program이라는 것으로 wrap up 해줘야함
-    GLuint shaderProgram = glCreateProgram();
-
-    // shaderProgram에게 vertex shader와 fragment shader를 plug in
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-
-    glLinkProgram(shaderProgram); // 실제 wrap up 처리하는 함수
-
-    // 이제 shader program에 vertex shader와 fragment shader가 다 들어갔으므로, 얘네는 더이상 사용 X -> delete
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    // 이렇게 하면 shader 관련 부분은 완료.
-    
-//    GLuint shaderProgram = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
-
-    // *************** SHADER ***************//
-
-    
-    // 삼각형의 꼭지점
-    GLfloat vertices[] =  // float을 써도 되긴 하지만, GLfloat을 사용하는 것이 openGL 내부 연산에서 좀 더 안전
-    {
-        -0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,
-        0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,
-        0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f
-    };
-
-    
-    // 이제 openGL에게 vertices를 어떻게 사용할지, 어떻게 해석할지를 알려줘야함
-    // CPU와 GPU는 좀 느려.. 그래서 Big Batch = Buffer라는 것을 사용할 거야
-    
-    
-    // *************** Vertex Buffer ***************//
-    GLuint VAO;
-    GLuint VBO; // 보편적으로 VBO는 array. 여기 예제에서는 object가 하나라서 이렇게 선언
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO); // glGenBeffuer함수로 buffer를 생성. 인자: object #, vertex beffer
-
-    glBindVertexArray(VAO);
-
-    // OpenGL의 Binding: 특정 object를 current object로 설정. 그 종류의 object를 수정하는 함수가 호출되면, current object가 수정되는 셈
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); // GL_ARRAY_BUFFER: vertex buffer binding 용
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // vertex buffer에 실제 vertices를 넣어줌
-
-
-    // 그러나 여전히 OpenGL은 vertices를 어떻게 해석해야할 지 모름
-    // 그걸 돕는 VAO를 사용
-    // VAO는 VBO보다 반드시 먼저 선언 되어야함. => Line 94, 97, 99
-
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // glVertexAttribPointer: OpenGL이 VBO를 해석하도록 하는 함수
-    glEnableVertexAttribArray(0); // glEnableVertexAttribArray: 위에서 만든 걸 enabling
-
-    // nice if you do it
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    // *************** Vertex Buffer ***************//
-
-
-    // window 종료하지 않을 경우 지속
-    while(!glfwWindowShouldClose(window)){
-
-        glClear(GL_COLOR_BUFFER_BIT);
-        
-        // tutorial 2에서부터 glClearColor와 glClear를 while loop 안으로 가져옴
-        glClearColor(0.07f, 0.13f, 0.17f, 1.0f); // background color
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // shaderProgram을 사용하라고 명시
-        glUseProgram(shaderProgram);
-
-        // bind VAO (이게 지금은 object 한개라서 필수는 아니지만, 이 과정을 통해서 openGL에게 이 array를 사용하라고 명시하는 것)
-        glBindVertexArray(VAO);
-
-        // Draw function
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        // swap buffer
-        glfwSwapBuffers(window);
-
-        glfwPollEvents(); // 마우스 등을 사용하여 윈도우 사이즈를 조정했는지 확인하고 반영하는 함수
-
-        // window에 색상 추가
-
-    }
-    
-    
-    // 더 이상 사용하지 않는 것들 삭제
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shaderProgram);
-
-    // window로 해야할 일이 다 끝나면, window를 종료시키기
-    glfwDestroyWindow(window);
-    glfwTerminate();
-    return 0;
-}
-
-
-
-
-
-
-//int main2( void )
-//{
-//	// Initialise GLFW
-//	if( !glfwInit() )
-//	{
-//		fprintf( stderr, "Failed to initialize GLFW\n" );
-//		getchar();
-//		return -1;
-//	}
-//
-//	glfwWindowHint(GLFW_SAMPLES, 4);
-//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-//	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-//	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-//
-//	// Open a window and create its OpenGL context
-//	window = glfwCreateWindow( 1024, 768, "Tutorial 02 - Red triangle", NULL, NULL);
-//	if( window == NULL ){
-//		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
-//		getchar();
-//		glfwTerminate();
-//		return -1;
-//	}
-//	glfwMakeContextCurrent(window);
-//
-//	// Initialize GLEW
-//	glewExperimental = true; // Needed for core profile
-//	if (glewInit() != GLEW_OK) {
-//		fprintf(stderr, "Failed to initialize GLEW\n");
-//		getchar();
-//		glfwTerminate();
-//		return -1;
-//	}
-//
-//	// Ensure we can capture the escape key being pressed below
-//	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-//
-//	// Dark blue background
-//	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-//
-//	GLuint VertexArrayID;
-//	glGenVertexArrays(1, &VertexArrayID);
-//	glBindVertexArray(VertexArrayID);
-//
-//	// Create and compile our GLSL program from the shaders
-//	GLuint programID = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
-//
-//
-//	static const GLfloat g_vertex_buffer_data[] = {
-//		-1.0f, -1.0f, 0.0f,
-//		 1.0f, -1.0f, 0.0f,
-//		 0.0f,  1.0f, 0.0f,
-//	};
-//
-//	GLuint vertexbuffer;
-//	glGenBuffers(1, &vertexbuffer);
-//	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-//	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-//
-//	do{
-//
-//		// Clear the screen
-//		glClear( GL_COLOR_BUFFER_BIT );
-//
-//		// Use our shader
-//		glUseProgram(programID);
-//
-//		// 1rst attribute buffer : vertices
-//		glEnableVertexAttribArray(0);
-//		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-//		glVertexAttribPointer(
-//			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-//			3,                  // size
-//			GL_FLOAT,           // type
-//			GL_FALSE,           // normalized?
-//			0,                  // stride
-//			(void*)0            // array buffer offset
-//		);
-//
-//		// Draw the triangle !
-//		glDrawArrays(GL_TRIANGLES, 0, 3); // 3 indices starting at 0 -> 1 triangle
-//
-//		glDisableVertexAttribArray(0);
-//
-//		// Swap buffers
-//		glfwSwapBuffers(window);
-//		glfwPollEvents();
-//
-//	} // Check if the ESC key was pressed or the window was closed
-//	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-//		   glfwWindowShouldClose(window) == 0 );
-//
-//	// Cleanup VBO
-//	glDeleteBuffers(1, &vertexbuffer);
-//	glDeleteVertexArrays(1, &VertexArrayID);
-//	glDeleteProgram(programID);
-//
-//	// Close OpenGL window and terminate GLFW
-//	glfwTerminate();
-//
-//	return 0;
-//}
-//

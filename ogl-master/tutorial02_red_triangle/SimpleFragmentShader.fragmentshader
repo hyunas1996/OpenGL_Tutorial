@@ -3,10 +3,15 @@
 // Ouput data
 out vec3 color;
 
+// vertex shader에서 fragment shader의 input으로 넘겨준 color 값.
+// 중요: vertex shader output 이름 = fragment shader input 이름 (이거 안 해주면 openGL 이 인식 X)
+in vec3 vertexColor;
+
 void main()
 {
 
 	// Output color = red 
-	color = vec3(1,0,0);
+	// color = vec3(1,0,0); 기존에 있던 이 코드를 아래처럼 변경
+    color = vertexColor;
 
 }

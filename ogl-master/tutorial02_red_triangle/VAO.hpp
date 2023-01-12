@@ -29,6 +29,8 @@ public:
 
     // Links a VBO to the VAO using a certain layout
     void LinkVBO(VBO& VBO, GLuint layout);
+    // Shader를 위해서 필요한 함수
+    void LinkAttrib(VBO VBO, GLuint layout, GLuint numComponents, GLenum type, GLsizeiptr stride, void* offset);
     // Binds the VAO
     void Bind();
     // Unbinds the VAO
