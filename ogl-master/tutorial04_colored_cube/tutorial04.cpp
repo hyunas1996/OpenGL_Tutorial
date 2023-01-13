@@ -17,7 +17,7 @@ using namespace glm;
 
 #include <common/shader.hpp>
 
-int main( void )
+int main_original( void )
 {
     // Initialise GLFW
     if( !glfwInit() )
@@ -251,7 +251,7 @@ int main( void )
     return 0;
 }
 
-int main_my( void )
+int main( void )
 {
     // Initialise GLFW
     if( !glfwInit() )
@@ -398,7 +398,8 @@ int main_my( void )
     do{
 
         // Clear the screen
-        glClear( GL_COLOR_BUFFER_BIT );
+//        glClear( GL_COLOR_BUFFER_BIT );
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Use our shader
         glUseProgram(programID);
@@ -410,7 +411,7 @@ int main_my( void )
         model = glm::rotate(model, glm::radians(rotation), vec3(0.0f, 1.0f, 0.0f));
         
         //view = glm::translate(view, vec3(0.0f, -0.5f, -0.0f));
-        view = glm::lookAt(glm::vec3(4,3,-3), // camera is at 4, 3, -3 in world space
+        view = glm::lookAt(glm::vec3(0.0f, -3.0f, -10.0f), // camera is at 4, 3, -3 in world space
                            glm::vec3(0,0,0),  // camera looks at the origin
                            glm::vec3(0,1,0)   // Head is up (set to 0,-1,0 to look upside down
                            );
